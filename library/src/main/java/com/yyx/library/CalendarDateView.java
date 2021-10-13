@@ -1,6 +1,5 @@
 package com.yyx.library;
 
-import com.yyx.library.utils.ResUtil;
 import ohos.agp.components.*;
 
 import ohos.agp.utils.Color;
@@ -24,16 +23,17 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
     private static final String SHAPE_TYPE = "shape_type";
 
 
-    private MonthDateView.ShapeType mBgShape = MonthDateView.ShapeType.circle;
+    private MonthDateComponent.ShapeType mBgShape = MonthDateComponent.ShapeType.CIRCLE;
     private Color mDayColor;
     private Color mSelectDayColor;
     private Color mSelectBGColor;
     private Color mCurrentColor;
     private Color mTipColor;
 
-    private MonthDateView.DateClick onDateClickListener;
-    HashMap<Integer, MonthDateView> views = new HashMap<>();
-    private LinkedList<MonthDateView> cache = new LinkedList();
+    private MonthDateComponent.DateClick onDateClickListener;
+    HashMap<Integer, MonthDateComponent> views = new HashMap<>();
+
+    private LinkedList<MonthDateComponent> cache = new LinkedList<>();
 
     private OnItemClickListener onItemClickListener;
 
@@ -47,35 +47,29 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
 
     public CalendarDateView(Context context, AttrSet attrs) {
         super(context, attrs);
-        Color DEF_CURRENT_DAY_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_current_day_color);
-        mCurrentColor = attrs.getAttr(CURRENT_DAY_COLOR).isPresent() ?
-                attrs.getAttr(CURRENT_DAY_COLOR).get().getColorValue() :
-                DEF_CURRENT_DAY_COLOR;
-
-        Color DEF_DAY_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_day_color);
-        mDayColor = attrs.getAttr(DAY_COLOR).isPresent() ?
-                attrs.getAttr(DAY_COLOR).get().getColorValue() :
-                DEF_DAY_COLOR;
-
-        Color DEF_SEL_DAY_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_selected_day_color);
-        mSelectDayColor = attrs.getAttr(SELECTED_DAY_COLOR).isPresent() ?
-                attrs.getAttr(SELECTED_DAY_COLOR).get().getColorValue() :
-                DEF_SEL_DAY_COLOR;
-
-        Color DEF_SEL_BG_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_tip_color);
-        mSelectBGColor = attrs.getAttr(SELECTED_DAY_BG_COLOR).isPresent() ?
-                attrs.getAttr(SELECTED_DAY_BG_COLOR).get().getColorValue() :
-                DEF_SEL_BG_COLOR;
-
-        Color DEF_TIP_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_tip_color);
-        mTipColor = attrs.getAttr(TIP_COLOR).isPresent() ?
-                attrs.getAttr(TIP_COLOR).get().getColorValue() :
-                DEF_TIP_COLOR;
-
-        if (attrs.getAttr(SHAPE_TYPE).isPresent()) {
-            mBgShape = MonthDateView.ShapeType.valueOf(attrs.getAttr(SHAPE_TYPE).get().getStringValue());
+        if (attrs.getAttr(CURRENT_DAY_COLOR).isPresent()) {
+            mCurrentColor = attrs.getAttr(CURRENT_DAY_COLOR).get().getColorValue();
         }
 
+        if (attrs.getAttr(DAY_COLOR).isPresent()) {
+            mDayColor = attrs.getAttr(DAY_COLOR).get().getColorValue();
+        }
+
+        if (attrs.getAttr(SELECTED_DAY_COLOR).isPresent()) {
+            mSelectDayColor = attrs.getAttr(SELECTED_DAY_COLOR).get().getColorValue();
+        }
+
+        if (attrs.getAttr(SELECTED_DAY_BG_COLOR).isPresent()) {
+            mSelectBGColor = attrs.getAttr(SELECTED_DAY_BG_COLOR).get().getColorValue();
+        }
+
+        if (attrs.getAttr(TIP_COLOR).isPresent()) {
+            mTipColor = attrs.getAttr(TIP_COLOR).get().getColorValue();
+        }
+
+        if (attrs.getAttr(SHAPE_TYPE).isPresent()) {
+            mBgShape = MonthDateComponent.ShapeType.valueOf(attrs.getAttr(SHAPE_TYPE).get().getStringValue().toUpperCase());
+        }
         init();
     }
 
@@ -115,30 +109,25 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
 
             @Override
             public Object createPageInContainer(ComponentContainer componentContainer, int position) {
-                MonthDateView view;
+                MonthDateComponent component;
                 if (!cache.isEmpty()) {
-                    view = cache.removeFirst();
+                    component = cache.removeFirst();
                 } else {
-
-                    view = new MonthDateView(componentContainer.getContext());
-                    view.setmDayColor(mDayColor);
-                    view.setmSelectBGColor(mSelectBGColor);
-                    view.setmSelectDayColor(mSelectDayColor);
-                    view.setmCurrentColor(mCurrentColor);
-                    view.setmTipColor(mTipColor);
-                    view.setSelectedBgShape(mBgShape);
+                    component = new MonthDateComponent(componentContainer.getContext());
+                    setMonthColors(component);
                 }
-                view.setDateClick(onDateClickListener);
-                view.setSelectDate(mSelYear, mSelMonth, mSelDay);
-                componentContainer.addComponent(view);
-                views.put(position, view);
-                return view;
+                component.setDateClick(onDateClickListener);
+                component.setSelectDate(mSelYear, mSelMonth, mSelDay);
+                componentContainer.addComponent(component);
+                views.put(position, component);
+                return component;
             }
+
 
             @Override
             public void destroyPageFromContainer(ComponentContainer componentContainer, int position, Object object) {
                 componentContainer.removeComponent((Component) object);
-                cache.addLast((MonthDateView) object);
+                cache.addLast((MonthDateComponent) object);
                 views.remove(position);
             }
 
@@ -153,6 +142,15 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
 
         addPageChangedListener(this);
 
+    }
+
+    private void setMonthColors(MonthDateComponent component) {
+        if (mDayColor != null) component.setmDayColorMonth(mDayColor);
+        if (mSelectBGColor != null) component.setmSelectBGColorMonth(mSelectBGColor);
+        if (mSelectDayColor != null) component.setmSelectDayColorMonth(mSelectDayColor);
+        if (mCurrentColor != null) component.setmCurrentColorMonth(mCurrentColor);
+        if (mTipColor != null) component.setmTipColorMonth(mTipColor);
+        if (mBgShape != null) component.setSelectedBgShape(mBgShape);
     }
 
     /**
@@ -175,7 +173,7 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
      *
      * @param view
      */
-    private void nextMonth(MonthDateView view) {
+    private void nextMonth(MonthDateComponent view) {
         int year = mSelYear;
         int month = mSelMonth;
         int day = mSelDay;
@@ -199,7 +197,7 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
      *
      * @param view
      */
-    private void previousMonth(MonthDateView view) {
+    private void previousMonth(MonthDateComponent view) {
         int year = mSelYear;
         int month = mSelMonth;
         int day = mSelDay;
@@ -221,17 +219,17 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
 
     @Override
     public void onPageSliding(int i, float v, int i1) {
-
+        //Only onPageChosen needs to override
     }
 
     @Override
     public void onPageSlideStateChanged(int i) {
-
+        //Only onPageChosen needs to override
     }
 
     @Override
     public void onPageChosen(int position) {
-        MonthDateView view = views.get(position);
+        MonthDateComponent view = views.get(position);
         if (position > mCurrentPos) {
             nextMonth(view);
         } else if (position < mCurrentPos) {
@@ -277,7 +275,7 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
      *
      * @param mBgShape
      */
-    public void setBgShape(MonthDateView.ShapeType mBgShape) {
+    public void setBgShape(MonthDateComponent.ShapeType mBgShape) {
         this.mBgShape = mBgShape;
     }
 

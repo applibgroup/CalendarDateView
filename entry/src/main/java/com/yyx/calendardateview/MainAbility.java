@@ -10,6 +10,4 @@ public class MainAbility extends Ability {
         super.setMainRoute(MainAbilitySlice.class.getName());
 
     }
-
-
 }

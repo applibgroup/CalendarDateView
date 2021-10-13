@@ -24,7 +24,7 @@
         ohos:id="$+id:main_cdv"
         ohos:height="600px"
         ohos:width="match_parent"
-        app:shape_type="rect"
+        app:shape_type="circle"
         app:tip_color="$color:black"
         />
 </DirectionalLayout>

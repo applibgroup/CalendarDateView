@@ -18,7 +18,7 @@ import java.util.List;
 
 import static com.yyx.library.utils.CanvasHelper.dpToPx;
 
-public class MonthDateView extends Component implements
+public class MonthDateComponent extends Component implements
         Component.DrawTask, Component.TouchEventListener {
 
     static final HiLogLabel label = new HiLogLabel(HiLog.LOG_APP, 0x00201, "LOG_KKK2");
@@ -38,14 +38,14 @@ public class MonthDateView extends Component implements
     public static final int RECT_SEL_BG = 0;
     public static final int CIRCLE_SEL_BG = 1;
 
-    public static enum ShapeType {circle, rect}
+    public enum ShapeType {CIRCLE, RECT}
 
-    private ShapeType mBgShape = ShapeType.circle;
-    private Color mDayColor;
-    private Color mSelectDayColor;
-    private Color mSelectBGColor;
-    private Color mCurrentColor;
-    private Color mTipColor;
+    private ShapeType mBgShape = ShapeType.CIRCLE;
+    private Color mDayColorMonth;
+    private Color mSelectDayColorMonth;
+    private Color mSelectBGColorMonth;
+    private Color mCurrentColorMonth;
+    private Color mTipColorMonth;
 
     private Paint mPaint;
 
@@ -64,45 +64,47 @@ public class MonthDateView extends Component implements
     private DateClick dateClick;
     private List<Integer> daysHasThingList;
 
-    public MonthDateView(Context context) {
+    public MonthDateComponent(Context context) {
         super(context);
         addDrawTask(this);
+        setupDefaultColors();
         setTouchEventListener(this);
         init();
     }
 
-    public MonthDateView(Context context, AttrSet attrs) {
+    private void setupDefaultColors() {
+        mCurrentColorMonth = ResUtil.getColor(getContext(), ResourceTable.Color_default_current_day_color);
+        mDayColorMonth = ResUtil.getColor(getContext(), ResourceTable.Color_default_day_color);
+        mSelectDayColorMonth = ResUtil.getColor(getContext(), ResourceTable.Color_default_selected_day_color);
+        mSelectBGColorMonth = ResUtil.getColor(getContext(), ResourceTable.Color_default_selected_day_bg_color);
+        mTipColorMonth = ResUtil.getColor(getContext(), ResourceTable.Color_default_tip_color);
+    }
+
+    public MonthDateComponent(Context context, AttrSet attrs) {
         super(context, attrs);
         addDrawTask(this);
         setTouchEventListener(this);
 
-        Color DEF_CURRENT_DAY_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_current_day_color);
-        mCurrentColor = attrs.getAttr(CURRENT_DAY_COLOR).isPresent() ?
-                attrs.getAttr(CURRENT_DAY_COLOR).get().getColorValue() :
-                DEF_CURRENT_DAY_COLOR;
+        setupDefaultColors();
 
-        Color DEF_DAY_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_day_color);
-        mDayColor = attrs.getAttr(DAY_COLOR).isPresent() ?
-                attrs.getAttr(DAY_COLOR).get().getColorValue() :
-                DEF_DAY_COLOR;
-
-        Color DEF_SEL_DAY_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_selected_day_color);
-        mSelectDayColor = attrs.getAttr(SELECTED_DAY_COLOR).isPresent() ?
-                attrs.getAttr(SELECTED_DAY_COLOR).get().getColorValue() :
-                DEF_SEL_DAY_COLOR;
-
-        Color DEF_SEL_BG_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_tip_color);
-        mSelectBGColor = attrs.getAttr(SELECTED_DAY_BG_COLOR).isPresent() ?
-                attrs.getAttr(SELECTED_DAY_BG_COLOR).get().getColorValue() :
-                DEF_SEL_BG_COLOR;
-
-        Color DEF_TIP_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_tip_color);
-        mTipColor = attrs.getAttr(TIP_COLOR).isPresent() ?
-                attrs.getAttr(TIP_COLOR).get().getColorValue() :
-                DEF_TIP_COLOR;
+        if (attrs.getAttr(CURRENT_DAY_COLOR).isPresent()) {
+            mCurrentColorMonth = attrs.getAttr(CURRENT_DAY_COLOR).get().getColorValue();
+        }
+        if (attrs.getAttr(DAY_COLOR).isPresent()) {
+            mDayColorMonth = attrs.getAttr(DAY_COLOR).get().getColorValue();
+        }
+        if (attrs.getAttr(SELECTED_DAY_COLOR).isPresent()) {
+            mSelectDayColorMonth = attrs.getAttr(SELECTED_DAY_COLOR).get().getColorValue();
+        }
+        if (attrs.getAttr(SELECTED_DAY_BG_COLOR).isPresent()) {
+            mSelectBGColorMonth = attrs.getAttr(SELECTED_DAY_BG_COLOR).get().getColorValue();
+        }
+        if (attrs.getAttr(TIP_COLOR).isPresent()) {
+            mTipColorMonth = attrs.getAttr(TIP_COLOR).get().getColorValue();
+        }
 
         if (attrs.getAttr(SHAPE_TYPE).isPresent()) {
-            mBgShape = ShapeType.valueOf(attrs.getAttr(SHAPE_TYPE).get().getStringValue());
+            mBgShape = ShapeType.valueOf(attrs.getAttr(SHAPE_TYPE).get().getStringValue().toUpperCase());
         }
 
         init();
@@ -115,6 +117,30 @@ public class MonthDateView extends Component implements
         mCurrMonth = calendar.get(Calendar.MONTH);
         mCurrDay = calendar.get(Calendar.DATE);
         setSelectYearMonth(mCurrYear, mCurrMonth, mCurrDay);
+    }
+
+    private void checkAndSetSelectedDayColor(String dayString, Canvas canvas, int column, int row) {
+        if (dayString.equals(mSelDay + "")) {
+            HiLog.debug(label, "mSelDay:" + mSelDay);
+            //Draw background color rectangle
+            int startRecX = mColumnSize * column;
+            int startRecY = mRowSize * row;
+            int endRecX = startRecX + mColumnSize;
+            int endRecY = startRecY + mRowSize;
+            mPaint.setColor(mSelectBGColorMonth);
+            if (mBgShape == ShapeType.CIRCLE) {
+                HiLog.debug(label, "mBgShape:" + CIRCLE_SEL_BG);
+                Rect rect = new Rect(startRecX, startRecY, endRecX, endRecY);
+                int radius = rect.getWidth() > rect.getHeight() ? rect.getHeight() / 2 : rect.getWidth() / 2;
+                canvas.drawCircle(rect.getCenterX(), rect.getCenterY(), radius, mPaint);
+
+            } else if (mBgShape == ShapeType.RECT) {
+                HiLog.debug(label, "mBgShape:" + RECT_SEL_BG);
+                canvas.drawRect(startRecX, startRecY, endRecX, endRecY, mPaint);
+            }
+            //Record the first few lines, that is, the first few weeks
+            weekRow = row + 1;
+        }
     }
 
     @Override
@@ -136,35 +162,15 @@ public class MonthDateView extends Component implements
             daysString[row][column] = day + 1;
             int startX = (int) (mColumnSize * column + (mColumnSize - mPaint.measureText(dayString)) / 2);
             int startY = (int) (mRowSize * row + mRowSize / 2 - (mPaint.ascent() + mPaint.descent()) / 2);
-            if (dayString.equals(mSelDay + "")) {
-                HiLog.debug(label, "mSelDay:" + mSelDay);
-                //Draw background color rectangle
-                int startRecX = mColumnSize * column;
-                int startRecY = mRowSize * row;
-                int endRecX = startRecX + mColumnSize;
-                int endRecY = startRecY + mRowSize;
-                mPaint.setColor(mSelectBGColor);
-                if (mBgShape == ShapeType.circle) {
-                    HiLog.debug(label, "mBgShape:" + CIRCLE_SEL_BG);
-                    Rect rect = new Rect(startRecX, startRecY, endRecX, endRecY);
-                    int radius = rect.getWidth() > rect.getHeight() ? rect.getHeight() / 2 : rect.getWidth() / 2;
-                    canvas.drawCircle(rect.getCenterX(), rect.getCenterY(), radius, mPaint);
-
-                } else if (mBgShape == ShapeType.rect) {
-                    HiLog.debug(label, "mBgShape:" + RECT_SEL_BG);
-                    canvas.drawRect(startRecX, startRecY, endRecX, endRecY, mPaint);
-                }
-                //Record the first few lines, that is, the first few weeks
-                weekRow = row + 1;
-            }
+            checkAndSetSelectedDayColor(dayString, canvas, column, row);
             //Draw a round sign for selected day
             drawCircle(row, column, day + 1, canvas);
             if (dayString.equals(mSelDay + "")) {
-                mPaint.setColor(mSelectDayColor);
+                mPaint.setColor(mSelectDayColorMonth);
             } else if (dayString.equals(mCurrDay + "") && mCurrDay != mSelDay && mCurrMonth == mSelMonth) {
-                mPaint.setColor(mCurrentColor);
+                mPaint.setColor(mCurrentColorMonth);
             } else {
-                mPaint.setColor(mDayColor);
+                mPaint.setColor(mDayColorMonth);
             }
             canvas.drawText(mPaint, dayString, startX, startY);
             if (tv_date != null) {
@@ -181,7 +187,7 @@ public class MonthDateView extends Component implements
     private void drawCircle(int row, int column, int day, Canvas canvas) {
         if (daysHasThingList != null && daysHasThingList.size() > 0) {
             if (!daysHasThingList.contains(day)) return;
-            mPaint.setColor(mTipColor);
+            mPaint.setColor(mTipColorMonth);
             float circleX = (float) (mColumnSize * column + mColumnSize * 0.8);
             float circley = (float) (mRowSize * row + mRowSize * 0.2);
             canvas.drawCircle(circleX, circley, mCircleRadius, mPaint);
@@ -210,6 +216,10 @@ public class MonthDateView extends Component implements
                     HiLog.debug(label, "onTouchEvent.PMath.abs");
                     doClickAction((upX + downX) / 2, (upY + downY) / 2);
                 }
+                break;
+            default:
+                downX = (int) touchEvent.getPointerPosition(0).getX();
+                downY = (int) touchEvent.getPointerPosition(0).getY();
                 break;
         }
         return true;
@@ -263,19 +273,19 @@ public class MonthDateView extends Component implements
      * Left click, the calendar will page backwards
      */
     public void onPreviousClick() {
-        int year = mSelYear;
-        int month = mSelMonth;
-        int day = mSelDay;
-        if (month == 0) {//若果是1月份，则变成12月份
-            year = mSelYear - 1;
-            month = 11;
+        int currentYear = mSelYear;
+        int currentMonth = mSelMonth;
+        int currentDay = mSelDay;
+        if (currentMonth == 0) {
+            currentYear = mSelYear - 1;
+            currentMonth = 11;
         } else {
-            month--;
+            currentMonth--;
         }
-        if (day > DateUtils.getMonthDays(year, month)) {
-            day = DateUtils.getMonthDays(year, month);
+        if (currentDay > DateUtils.getMonthDays(currentYear, currentMonth)) {
+            currentDay = DateUtils.getMonthDays(currentYear, currentMonth);
         }
-        setSelectYearMonth(year, month, day);
+        setSelectYearMonth(currentYear, currentMonth, currentDay);
         invalidate();
     }
 
@@ -329,28 +339,28 @@ public class MonthDateView extends Component implements
     /**
      * The font color of ordinary date, the default is black
      *
-     * @param mDayColor
+     * @param mDayColorMonth
      */
-    public void setmDayColor(Color mDayColor) {
-        this.mDayColor = mDayColor;
+    public void setmDayColorMonth(Color mDayColorMonth) {
+        this.mDayColorMonth = mDayColorMonth;
     }
 
     /**
      * Select the color of the selected date, the default is white
      *
-     * @param mSelectDayColor
+     * @param mSelectDayColorMonth
      */
-    public void setmSelectDayColor(Color mSelectDayColor) {
-        this.mSelectDayColor = mSelectDayColor;
+    public void setmSelectDayColorMonth(Color mSelectDayColorMonth) {
+        this.mSelectDayColorMonth = mSelectDayColorMonth;
     }
 
     /**
      * The background color of the selected date, the default is blue
      *
-     * @param mSelectBGColor
+     * @param mSelectBGColorMonth
      */
-    public void setmSelectBGColor(Color mSelectBGColor) {
-        this.mSelectBGColor = mSelectBGColor;
+    public void setmSelectBGColorMonth(Color mSelectBGColorMonth) {
+        this.mSelectBGColorMonth = mSelectBGColorMonth;
     }
 
     /**
@@ -365,10 +375,10 @@ public class MonthDateView extends Component implements
     /**
      * Color of the current date when not selected, the default is red
      *
-     * @param mCurrentColor
+     * @param mCurrentColorMonth
      */
-    public void setmCurrentColor(Color mCurrentColor) {
-        this.mCurrentColor = mCurrentColor;
+    public void setmCurrentColorMonth(Color mCurrentColorMonth) {
+        this.mCurrentColorMonth = mCurrentColorMonth;
     }
 
 
@@ -414,10 +424,10 @@ public class MonthDateView extends Component implements
     /**
      * Set the radius of the circle
      *
-     * @param mTipColor
+     * @param mTipColorMonth
      */
-    public void setmTipColor(Color mTipColor) {
-        this.mTipColor = mTipColor;
+    public void setmTipColorMonth(Color mTipColorMonth) {
+        this.mTipColorMonth = mTipColorMonth;
     }
 
 
