@@ -38,7 +38,7 @@
         "name": "com.yyx.calendardateview.MainAbility",
         "icon": "$media:icon",
         "description": "$string:mainability_description",
-        "label": "$string:entry_MainAbility",
+        "label": "$string:CalendardateView",
         "type": "page",
         "launchType": "standard"
       }

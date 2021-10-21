@@ -16,7 +16,7 @@
 
     <com.yyx.library.WeekDayView
         ohos:id="$+id:main_wdv"
-        ohos:height="40px"
+        ohos:height="100px"
         ohos:width="match_parent"
         />
 

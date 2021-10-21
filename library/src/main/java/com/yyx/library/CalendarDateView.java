@@ -42,7 +42,8 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
     private int mSelYear, mSelMonth, mSelDay;
 
     public CalendarDateView(Context context) {
-        this(context, null);
+        super(context);
+        init();
     }
 
     public CalendarDateView(Context context, AttrSet attrs) {
@@ -75,6 +76,10 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
+    }
+
+    public OnItemClickListener getOnItemClickListener() {
+        return onItemClickListener;
     }
 
     public void setDateTextView(Text date) {
@@ -270,6 +275,18 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
         this.mSelDay = mSelDay;
     }
 
+    public Color getSelectDayColor() {
+        return mSelectDayColor;
+    }
+
+    public Color getSelectBGColor() {
+        return mSelectBGColor;
+    }
+
+    public Color getCurrentColor() {
+        return mCurrentColor;
+    }
+
     /**
      * Set the selected date background shape
      *
@@ -279,6 +296,10 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
         this.mBgShape = mBgShape;
     }
 
+    public MonthDateComponent.ShapeType getBgShape() {
+        return mBgShape;
+    }
+
     /**
      * Set other date colors
      *
@@ -286,6 +307,10 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
      */
     public void setDayColor(Color mDayColor) {
         this.mDayColor = mDayColor;
+    }
+
+    public Color getDayColor() {
+        return mDayColor;
     }
 
     /**
@@ -322,5 +347,9 @@ public class CalendarDateView extends PageSlider implements PageSlider.PageChang
      */
     public void setTipColor(Color mTipColor) {
         this.mTipColor = mTipColor;
+    }
+
+    public Color getTipColor() {
+        return mTipColor;
     }
 }

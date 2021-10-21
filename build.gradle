@@ -41,7 +41,7 @@ allprojects {
 
 sonarqube {
   /*  properties {
-        property "sonar.projectKey", "CalendarDateView"
+        property "sonar.projectKey", "CalendarDateVie"
         property "sonar.organization", "applibgroup"
         property "sonar.host.url", "http://localhost:9000"
         property "sonar.sources", "entry,library"

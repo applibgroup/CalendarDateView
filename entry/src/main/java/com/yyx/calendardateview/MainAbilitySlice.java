@@ -1,6 +1,7 @@
 package com.yyx.calendardateview;
 
 import com.yyx.library.CalendarDateView;
+import com.yyx.library.WeekDayView;
 import ohos.aafwk.ability.AbilitySlice;
 import ohos.aafwk.content.Intent;
 import ohos.agp.components.Text;
@@ -24,6 +25,7 @@ public class MainAbilitySlice extends AbilitySlice {
     private void initView() {
         mCdv = (CalendarDateView) findComponentById(ResourceTable.Id_main_cdv);
         mTvDate = (Text) findComponentById(ResourceTable.Id_main_date);
+
     }
 
     private void otherLogic() {

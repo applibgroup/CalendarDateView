@@ -14,7 +14,7 @@ import ohos.hiviewdfx.HiLogLabel;
 import static com.yyx.library.utils.CanvasHelper.dpToPx;
 
 
-public class WeekDayView extends Component implements Component.EstimateSizeListener, Component.DrawTask {
+public class WeekDayView extends Component implements Component.EstimateSizeListener, Component.DrawTask, Component.LayoutRefreshedListener {
     static final HiLogLabel label = new HiLogLabel(HiLog.LOG_APP, 0x00201, "KKK_LOG");
 
     //attributes
@@ -51,6 +51,7 @@ public class WeekDayView extends Component implements Component.EstimateSizeList
         super(context, attrs);
         setEstimateSizeListener(this);
         addDrawTask(this);
+        setLayoutRefreshedListener(this);
         HiLog.debug(label, "WeekDayView Constructor");
 
         Color DEF_TOP_LINE_COLOR = ResUtil.getColor(getContext(), ResourceTable.Color_default_top_line_color);
@@ -96,6 +97,8 @@ public class WeekDayView extends Component implements Component.EstimateSizeList
 
         if (heightMode == EstimateSpec.NOT_EXCEED) {
             heightSize = EstimateSpec.getSizeWithMode(30, EstimateSpec.PRECISE);
+            HiLog.debug(label, "heightSize===" + heightSize);
+
         }
         if (widthMode == EstimateSpec.NOT_EXCEED) {
             widthSize = EstimateSpec.getSizeWithMode(300, EstimateSpec.PRECISE);
@@ -108,8 +111,8 @@ public class WeekDayView extends Component implements Component.EstimateSizeList
     public void onDraw(Component component, Canvas canvas) {
         HiLog.debug(label, "onDraw");
         paint.setAntiAlias(true);    //抗锯齿
-        int width = getWidth();
-        int height = getHeight();
+        int width = getEstimatedWidth();
+        int height = getEstimatedHeight();
         if (isDrawTBLine) {
             //进行画上下线
             paint.setStyle(Style.STROKE_STYLE);
@@ -208,4 +211,8 @@ public class WeekDayView extends Component implements Component.EstimateSizeList
     }
 
 
+    @Override
+    public void onRefreshed(Component component) {
+        component.invalidate();
+    }
 }
