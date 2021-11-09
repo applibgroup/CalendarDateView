@@ -4,7 +4,7 @@
 # Calendar Date View
 An Android date selection control, supporting unlimited sliding.
 <p>
-	<image src = "/Material%20Calendar.png" width = 320 height = 512)/></image>
+	<image src = "/demo.png" width = 320 height = 512)/></image>
 </p>
 
 # Source
